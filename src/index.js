@@ -98,19 +98,22 @@ document.addEventListener("DOMContentLoaded", () => {
     //
     // 1. Show the question
     // Update the inner text of the question container element and show the question text
-
+    questionContainer.innerText = question.text;
     
     // 2. Update the green progress bar
     // Update the green progress bar (div#progressBar) width so that it shows the percentage of questions answered
-    
-    progressBar.style.width = `65%`; // This value is hardcoded as a placeholder
+
+    const currentQuestionIndex = quiz.currentQuestionIndex; // Índice de la pregunta actual
+    const totalQuestions = quiz.questions.length; // Total de preguntas
+    const progress = (currentQuestionIndex / totalQuestions) * 100; // Calcula el porcentaje de progreso
+    progressBar.style.width = progress + "%";
 
 
 
     // 3. Update the question count text 
     // Update the question count (div#questionCount) show the current question out of total questions
     
-    questionCount.innerText = `Question 1 of 10`; //  This value is hardcoded as a placeholder
+    questionCount.innerText = `Question ${currentQuestionIndex + 1} of  ${totalQuestions}`; //  This value is hardcoded as a placeholder
 
 
     
@@ -128,6 +131,24 @@ document.addEventListener("DOMContentLoaded", () => {
       // Hint 3: You can use the `element.appendChild()` method to append an element to the choices container.
       // Hint 4: You can use the `element.innerText` property to set the inner text of an element.
 
+
+      question.choices.forEach((choiceText) => {
+
+        const radioInput = document.createElement("input");
+        radioInput.type = "radio";
+        radioInput.name = "choice";
+        radioInput.value = choiceText;
+
+        const choiceLabel = document.createElement("label");
+        choiceLabel.innerText = choiceText;
+
+        const br = document.createElement("br");
+
+        choiceContainer.appendChild(radioInput);
+        choiceContainer.appendChild(choiceLabel);
+        choiceContainer.appendChild(br);
+      });
+
   }
 
 
@@ -135,23 +156,32 @@ document.addEventListener("DOMContentLoaded", () => {
   function nextButtonHandler () {
     let selectedAnswer; // A variable to store the selected answer value
 
-
-
     // YOUR CODE HERE:
     //
     // 1. Get all the choice elements. You can use the `document.querySelectorAll()` method.
-
+    const choices = document.querySelectorAll('');
 
     // 2. Loop through all the choice elements and check which one is selected
       // Hint: Radio input elements have a property `.checked` (e.g., `element.checked`).
       //  When a radio input gets selected the `.checked` property will be set to true.
       //  You can use check which choice was selected by checking if the `.checked` property is true.
-
+    choices.forEach((choice) => {
+      if (choice.checked()) {
+        selectedAnswer = choice.value;
+      }
+    });
       
     // 3. If an answer is selected (`selectedAnswer`), check if it is correct and move to the next question
       // Check if selected answer is correct by calling the quiz method `checkAnswer()` with the selected answer.
       // Move to the next question by calling the quiz method `moveToNextQuestion()`.
       // Show the next question by calling the function `showQuestion()`.
+    if (selectedAnswer) {
+      quiz.checkAnswer(selectedAnswer); 
+      quiz.moveToNextQuestion(); 
+      showQuestion(); 
+    } else {
+      alert("Please select an answeer!");
+    }
   }  
 
 
