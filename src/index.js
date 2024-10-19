@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const questionContainer = document.querySelector("#question");
   const choiceContainer = document.querySelector("#choices");
   const nextButton = document.querySelector("#nextButton");
+  const restartButton = document.querySelector("#restartButton");
 
   // End view elements
   const resultContainer = document.querySelector("#result");
@@ -45,13 +46,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /************  SHOW INITIAL CONTENT  ************/
 
-  // Convert the time remaining in seconds to minutes and seconds, and pad the numbers with zeros if needed
-  const minutes = Math.floor(quiz.timeRemaining / 60).toString().padStart(2, "0");
-  const seconds = (quiz.timeRemaining % 60).toString().padStart(2, "0");
+  function updateTimerDisplay() {
 
-  // Display the time remaining in the time remaining container
-  const timeRemainingContainer = document.getElementById("timeRemaining");
-  timeRemainingContainer.innerText = `${minutes}:${seconds}`;
+    // Convert the time remaining in seconds to minutes and seconds, and pad the numbers with zeros if needed
+    const minutes = Math.floor(quiz.timeRemaining / 60).toString().padStart(2, "0");
+    const seconds = (quiz.timeRemaining % 60).toString().padStart(2, "0");
+
+    // Display the time remaining in the time remaining container
+    const timeRemainingContainer = document.getElementById("timeRemaining");
+    timeRemainingContainer.innerText = `${minutes}:${seconds}`;
+
+  }
 
   // Show first question
   showQuestion();
@@ -59,21 +64,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /************  TIMER  ************/
 
-  let timer;
+  // let timer;
+  let intervalID;
 
+
+  function startTimer() {
+
+    intervalID = setInterval(() => {
+
+      quiz.timeRemaining--;  // Reducir el tiempo restante en el cuestionario
+      updateTimerDisplay();  // Actualizar la visualización del temporizador
+  
+      // Si el tiempo se agota, detener el temporizador y mostrar los resultados
+      if (quiz.timeRemaining <= 0) {
+        clearInterval(intervalID);  // Detener el temporizador
+        endView.style.display = 'flex';
+        showResults();         // Mostrar los resultados cuando el tiempo termine
+      }
+    }, 1000);
+  }
+  
 
   /************  EVENT LISTENERS  ************/
 
   nextButton.addEventListener("click", nextButtonHandler);
+  restartButton.addEventListener("click", restartButtonHandler);
 
-
+  startTimer();
 
   /************  FUNCTIONS  ************/
 
   // showQuestion() - Displays the current question and its choices
   // nextButtonHandler() - Handles the click on the next button
   // showResults() - Displays the end view and the quiz results
-
+  // restartButtonHandler() - Reset the quiz and shuffles again all questions
 
 
   function showQuestion() {
@@ -154,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
   function nextButtonHandler () {
-    let selectedAnswer; // A variable to store the selected answer value
+    let selectedAnswer = null; // A variable to store the selected answer value
 
     // YOUR CODE HERE:
     //
@@ -182,11 +206,11 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (!quiz.checkAnswer(selectedAnswer)) {
       quiz.moveToNextQuestion(); 
       showQuestion(); 
-    } else {
+    } 
+    else if (selectedAnswer = null) {
       alert("Please select an answer!");
     }
   }  
-
 
 
 
@@ -204,6 +228,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalQuestions = quiz.questions.length;
     const correctAnswers = quiz.correctAnswers;
     resultContainer.innerText = `You scored ${correctAnswers} out of ${totalQuestions} correct answers!`;
+
+    // Stop the Timer when the Quiz Ends
+    clearInterval(intervalID);
+
+  }
+
+
+
+  function restartButtonHandler() {
+    // 1. Hide the end view (div#endView) 
+    endView.style.display = "none";
+    
+    // 2. Show the quiz view (div#quizView)
+    quizView.style.display = "block";
+
+    // 3. Reset the quiz
+    quiz.currentQuestionIndex = 0;
+    quiz.correctAnswers = 0;
+
+    quiz.shuffleQuestions();
+    showQuestion();
+
+    quiz.timeRemaining = quizDuration;  // Reset the timeRemaining
+    updateTimerDisplay();
+    startTimer();               // Update the timer display to show the initial time
+
   }
   
 });
